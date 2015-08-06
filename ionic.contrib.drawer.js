@@ -53,6 +53,7 @@ angular.module('ionic.contrib.drawer', ['ionic'])
     var drawerState = STATE_CLOSE;
     
     // Drawer overlay
+    var overlayEnabled = true;
     var $overlay = angular.element('<div class="drawer-overlay" />');
     var overlayEl = $overlay[0];
     var overlayState = STATE_CLOSE;
@@ -76,7 +77,11 @@ angular.module('ionic.contrib.drawer', ['ionic'])
         $timeout(function() {
           ionic.requestAnimationFrame(function() {
             var translateX = state === STATE_CLOSE ? '-100' : '0';
-            overlayEl.style[ionic.CSS.TRANSFORM] = 'translate3d(' + translateX + '%, 0, 0)';
+            
+            if (overlayEnabled) {
+                overlayEl.style[ionic.CSS.TRANSFORM] = 'translate3d(' + translateX + '%, 0, 0)';
+            }
+            
             if (state === STATE_CLOSE) {
               $element
                 .removeClass('opened')
@@ -182,7 +187,11 @@ angular.module('ionic.contrib.drawer', ['ionic'])
         translateX - width :
         width + translateX;
       ionic.requestAnimationFrame(function() {
-        overlayEl.style.opacity = opacity;
+        
+        if (overlayEnabled) {
+            overlayEl.style.opacity = opacity;
+        }
+          
         el.style[ionic.CSS.TRANSFORM] = 'translate3d(' + translateX + 'px, 0, 0)';
         contentEl.style[ionic.CSS.TRANSFORM] = 'translate3d(' + contentOffsetX + 'px, 0, 0)';
         $element
@@ -288,7 +297,11 @@ angular.module('ionic.contrib.drawer', ['ionic'])
           newX - width :
           width + newX;
         ionic.requestAnimationFrame(function() {
-          overlayEl.style.opacity = opacity;
+            
+            if (overlayEnabled) {
+                overlayEl.style.opacity = opacity;
+            }
+            
           el.style[ionic.CSS.TRANSFORM] = 'translate3d(' + newX + 'px, 0, 0)';
           contentEl.style[ionic.CSS.TRANSFORM] = 'translate3d(' + contentOffsetX + 'px, 0, 0)';
           $element
@@ -312,7 +325,11 @@ angular.module('ionic.contrib.drawer', ['ionic'])
       toggleOverlay(STATE_CLOSE);
 
       ionic.requestAnimationFrame(function() {
-        overlayEl.style.opacity = 0;
+          
+          if (overlayEnabled) {
+            overlayEl.style.opacity = 0;  
+          }
+          
         el.style[ionic.CSS.TRANSFORM] = 'translate3d(' + (side === SIDE_LEFT ? '-' : '') + '100%, 0, 0)';
         contentEl.style[ionic.CSS.TRANSFORM] = 'translate3d(0%, 0, 0)';
       });
@@ -330,12 +347,20 @@ angular.module('ionic.contrib.drawer', ['ionic'])
       var contentOffsetX = side === SIDE_LEFT ? width : -width;
 
       ionic.requestAnimationFrame(function() {
-        overlayEl.style.opacity = 1;
+          
+          if (overlayEnabled) {
+            overlayEl.style.opacity = 1;  
+          }
+          
         el.style[ionic.CSS.TRANSFORM] = 'translate3d(0, 0, 0)';
         contentEl.style[ionic.CSS.TRANSFORM] = 'translate3d(' + contentOffsetX +  'px, 0, 0)';
       });
       
       unregisterBackAction = $ionicPlatform.registerBackButtonAction(hardwareBackCallback, 100);
+    };
+    
+    this.disableOverlay = function() {
+        overlayEnabled = false;
     };
     
     this.isOpen = isOpen;
@@ -352,6 +377,10 @@ angular.module('ionic.contrib.drawer', ['ionic'])
     controller: 'drawerCtrl',
     link: function($scope, $element, $attr, ctrl) {
       $element.addClass($attr.side + ' closed');
+      
+      if ($attr.shadowOverlay === 'false') {
+          ctrl.disableOverlay();
+      }
       
       $scope.openDrawer = function() {
         ctrl.open();
